@@ -1,0 +1,30 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "=== Detecting OS ==="
+      - cat /etc/os-release
+      - echo "=== Installing NGINX ==="
+      - sudo dnf clean all
+      - sudo dnf makecache
+      - sudo dnf update -y
+      - sudo dnf install -y nginx git
+      - echo "=== Installation complete ==="
+
+  build:
+    commands:
+      - echo "Build started on $(date)"
+      - sudo mkdir -p /var/www/html/
+      - sudo cp index.html /var/www/html/
+      - echo "Copied index.html to /var/www/html/"
+
+  post_build:
+    commands:
+      - echo "Starting and enabling NGINX..."
+      - sudo systemctl enable --now nginx || echo "Systemd may not be available in CodeBuild container"
+      - echo "NGINX configuration completed at $(date)"
+
+artifacts:
+  files:
+    - /var/www/html/index.html
